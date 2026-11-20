@@ -1,0 +1,274 @@
+/*
+INSERT INTO 
+è l'istruzione SQL utilizzata per inserire nuovi record all'interno di una tabella.
+Sintassi di base:
+INSERT INTO NomeTabella
+    (colonna1, colonna2...)
+VALUES
+     (Valore1, valore2)
+*/
+
+
+ -- Le base di SQL Server
+
+/*
+	I Tipi di dati in sql server:
+
+	| Tipo             | Quando usarlo                    |
+	| ---------------- | -------------------------------- |
+	| INT  = INTERGER  | numeri interi (ID, età) = 100 000 000          |
+	| CHAR(1)		   | un solo carattere			      |
+	| DECIMAL(10,2)    | soldi (precisione!)              |
+	| NVARCHAR, VARCHAR| testo (sempre meglio di VARCHAR) |
+	| DATE             | solo data                        |
+	| DATETIME         | data + ora                       |
+	| BIT              | booleano (0/1)   Vero o Falso    |
+*/
+
+
+
+
+-- Creazione del database
+CREATE DATABASE ScuolaDb;
+
+-- Usa il database creato prima
+USE ScuolaDb;
+
+/*
+	Creazione della Tabella
+
+	Sintassi di base:
+	create table <nome_della_tabella> (
+		chiave primaria non può essere nullabile, deve incrementrsi(1,1)
+		colonne con tipo di dato e lughezza
+	);
+*/
+
+
+
+
+-- Creazione della tabella Studenti
+CREATE TABLE Studenti (
+	-- INT: Identifica un numero intero.
+	-- Identity(1,1): Genera automaticamente i numeri.
+	-- Il 1 indica il valore initiale.
+	-- Il 1 indica l'incrementazione
+	-- Primary key: Identifica in modo univoco ogni studente
+	StudenteId INT NOT NULL PRIMARY KEY IDENTITY(1,1),
+
+	-- NVARCHAR(50): Permette di memorizzare un testo fino a 50 caratteri
+	-- NOT NULL:: Obbiliga a inserire un valore
+	Nome NVARCHAR(50) NOT NULL,
+	Cognome NVARCHAR(50) NOT NULL,
+
+	-- Memorizza la data di nascita. Non possono lascire questo campo vuoto
+	DataNascita DATE NOT NULL,
+
+	-- UNIQUE: Impedisce di registrare due volte la stezza data o Nume di Telefono
+	Email NVARCHAR(100) UNIQUE,
+	Telefono NVARCHAR(20) UNIQUE NULL,
+
+	-- CHAR(16): Lunghezza fissa fi 16 caratteri
+	CodiceFiscale CHAR(16) UNIQUE NOT NULL,
+
+	-- Indica se lo studente è attivo
+	Attivo BIT DEFAULT 1
+);
+
+/*
+ Select * from <Nome Tabella>
+ Restituisce il risultato di tutte le righe
+*/
+SELECT * FROM Studenti;
+
+/*
+Questi sono le colonne della tabella dei Corsi
+
+CorsoId
+NomeCorso
+Descrizione
+Crediti
+Durata
+*/
+-- Creazione della tabella Corsi
+CREATE TABLE Corsi(
+	CorsoId INT NOT NULL PRIMARY KEY IDENTITY(1,1),
+	NomeCorso NVARCHAR(250) NOT NULL,
+	Descrizione NVARCHAR(100) NULL,
+	Crediti INT,
+	Durata INT
+);
+
+SELECT * FROM Corsi;
+
+
+-- Creaziondella tabella dei Docenti
+CREATE TABLE Docenti(
+	DocenteId INT NOT NULL PRIMARY KEY IDENTITY(1,1),
+	Nome NVARCHAR(50) NOT NULL,
+	Cognome NVARCHAR(50) NOT NULL,
+	Email NVARCHAR(150) UNIQUE NOT NULL,
+	Telefono NVARCHAR(20) UNIQUE NULL,
+	Specializzazione NVARCHAR(100) NULL,
+	CodiceFiscale CHAR(16) UNIQUE
+);
+
+SELECT * FROM Docenti;
+
+-- Creaziondella tabella Aule
+CREATE TABLE Aule(
+	AulaId INT NOT NULL PRIMARY KEY IDENTITY(1,1),
+	NomeAula NVARCHAR(100) NOT NULL,
+	Capacita INT NOT NULL
+);
+
+select * from aule;
+
+
+-- Modificare il nome di una colonna usando la procedura del system
+--EXEC sp_rename 'Studenti.StudentiId', 'StudenteId';
+
+-- CHIAVE ESTERNA IN SQL SERVER
+-- Uno studente può scriversi ad un o più corsi
+-- Creazione della tabella Iscrizioni
+CREATE TABLE Iscrizioni(
+	IscrizioneId INT NOT NULL PRIMARY KEY IDENTITY(1,1),
+	StudenteId INT NOT NULL,
+	CorsoId INT NOT NULL,
+	DataIscrizione DATE DEFAULT GETDATE(),
+
+	-- RELAZIONI TRA TABELLE
+	FOREIGN KEY (StudenteId) REFERENCES Studenti(StudenteId),
+	FOREIGN KEY (CorsoId) REFERENCES Corsi(CorsoId)
+);
+
+SELECT * FROM Iscrizioni;
+
+
+-- Creazione della tabella DocentiCorsi
+CREATE  TABLE DocentiCorsi(
+	DocenteCorsoId INT NOT NULL PRIMARY KEY IDENTITY(1,1),
+	DocenteId INT NOT NULL,
+	CorsoId INT NOT NULL,
+
+	FOREIGN KEY (DocenteId) REFERENCES Docenti(DocenteId),
+	FOREIGN KEY (CorsoId) REFERENCES Corsi(CorsoId)
+);
+
+
+select * from DocentiCorsi;
+
+
+-- Creazione della Tabella Lezioni
+CREATE TABLE Lezioni(
+	LezioneId INT NOT NULL PRIMARY KEY IDENTITY(1,1),
+	CorsoId INT NOT NULL,
+	AulaId INT NOT NULL,
+	DataCreazione Date Default GetDate(),
+	OraInizio TIME,
+	OraFine TIME,
+
+	FOREIGN KEY (AulaId) REFERENCES Aule(AulaId),
+	FOREIGN KEY (CorsoId) REFERENCES Corsi(CorsoId)
+);
+
+
+USE ScuolaDb
+
+
+select * from Studenti;
+
+INSERT INTO Studenti
+(
+    Nome,
+    Cognome,
+    DataNascita,
+    Email,
+    Telefono,
+    CodiceFiscale,
+    Attivo
+)
+VALUES
+	('Luca', 'Bianchi', '1999-02-10',
+	'luca@email.it', '3331111111',
+	'BNCLCU99B10501A', 1),
+
+	('Anna', 'Verdi', '2000-07-20',
+	'anna@email.it', '3332222222',
+	'VRDNNA00L60H501B', 1),
+
+	('Marco', 'Neri', '1997-11-05',
+	'marco@email.it', '3333333333',
+	'NREMRC97S05H501C', 1),
+
+	('Sara', 'Rossi', '2001-03-12',
+	'sara@email.it', '3334444444',
+	'RSSSRA01C52H501D', 1),
+
+	('Paolo', 'Gialli', '1998-09-25',
+	'paolo@email.it', '3335555555',
+	'GLLPLA98P25H501E', 1);
+
+
+SELECT * FROM Corsi;
+
+INSERT INTO Corsi
+(
+    NomeCorso,
+    Descrizione,
+    Crediti,
+    Durata
+)
+VALUES
+('SQL Server per Data Analysis',
+ 'Analisi e gestione dei dati con SQL Server',
+ 12, 60),
+
+('Python Data Analysis',
+ 'Analisi dei dati utilizzando Python e Pandas',
+ 15, 80),
+
+('Programmazione C#',
+ 'Fondamenti di programmazione con C# e .NET',
+ 10, 60),
+
+('Database Administration',
+ 'Gestione, sicurezza e amministrazione dei database',
+ 14, 90),
+
+('Power BI',
+ 'Creazione di dashboard e report aziendali',
+ 10, 40);
+
+
+  INSERT INTO Docenti
+(
+    Nome,
+    Cognome,
+    Email,
+    Telefono,
+    Specializzazione,
+    CodiceFiscale
+)
+VALUES
+('Moussa', 'Salisou',
+ 'moussa@email.it', '3401111111',
+ 'SQL Server e Data Analysis',
+ 'SLSMSS90A01H501A'),
+
+('Antonio', 'Bianchi',
+ 'antonio@email.it', '3402222222',
+ 'Programmazione C#',
+ 'BNCNTN85B12H501B'),
+
+('Laura', 'Verdi',
+ 'laura@email.it', '3403333333',
+ 'Python e Machine Learning',
+ 'VRDLRA88C45H501C'),
+
+('Marco', 'Rossi',
+ 'marco.docente@email.it', '3404444444',
+ 'Power BI e Business Intelligence',
+ 'RSSMRC80D15H501D');
+
+ SELECT * FROM Docenti; 
